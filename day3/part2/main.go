@@ -22,21 +22,19 @@ func main() {
 
 func findOxygenGeneratorRating(inputs []string) string {
 	return compute(inputs, func(oneBits, zeroBits int) rune {
-		val := '0'
 		if oneBits >= zeroBits {
-			val = '1'
+			return '1'
 		}
-		return val
+		return '0'
 	})
 }
 
 func findCO2ScrubberRating(inputs []string) string {
 	return compute(inputs, func(oneBits, zeroBits int) rune {
-		val := '1'
 		if zeroBits <= oneBits {
-			val = '0'
+			return '0'
 		}
-		return val
+		return '1'
 	})
 }
 
