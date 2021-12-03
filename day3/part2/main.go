@@ -20,65 +20,59 @@ func main() {
 	fmt.Println(epsilonRate * gammaRate)
 }
 
-func findOxygenGeneratorRating(inputs []string) string {
+func compute(inputs []string, inputsFilter func(oneBits, zeroBits, bitIndex int, inputs []string) []string) string {
 	for i := 0; i < len(inputs[0]); i++ {
 		zeroBits := 0
 		oneBits := 0
 		for j := 0; j < len(inputs); j++ {
-			num, _ := strconv.Atoi(string(inputs[j][i]))
-			if num == 0 {
+			if inputs[j][i] == '0' {
 				zeroBits++
 			} else {
 				oneBits++
 			}
 		}
+		inputs = inputsFilter(oneBits, zeroBits, i, inputs)
+		if len(inputs) == 1 {
+			return inputs[0]
+		}
+	}
+
+	return ""
+}
+
+func findOxygenGeneratorRating(inputs []string) string {
+	return compute(inputs, func(oneBits, zeroBits, bitIndex int, inputs []string) []string {
 		val := "0"
 		if oneBits >= zeroBits {
 			val = "1"
 		}
+
 		filteredInputs := make([]string, 0)
+
 		for _, input := range inputs {
-			if val == string(input[i]) {
+			if val == string(input[bitIndex]) {
 				filteredInputs = append(filteredInputs, input)
 			}
 		}
-		inputs = filteredInputs
-		if len(filteredInputs) == 1 {
-			return filteredInputs[0]
-		}
-	}
 
-	return inputs[0]
+		return filteredInputs
+	})
 }
 
 func findCO2ScrubberRating(inputs []string) string {
-	for i := 0; i < len(inputs[0]); i++ {
-		zeroBits := 0
-		oneBits := 0
-		for j := 0; j < len(inputs); j++ {
-			num, _ := strconv.Atoi(string(inputs[j][i]))
-			if num == 0 {
-				zeroBits++
-			} else {
-				oneBits++
-			}
-		}
-
-		val := "1"
+	return compute(inputs, func(oneBits, zeroBits, bitIndex int, inputs []string) []string {
+		val := '1'
 		if zeroBits <= oneBits {
-			val = "0"
+			val = '0'
 		}
 		filteredInputs := make([]string, 0)
 		for _, input := range inputs {
-			if val == string(input[i]) {
+			s := rune(input[bitIndex])
+			if s == val {
 				filteredInputs = append(filteredInputs, input)
 			}
 		}
-		inputs = filteredInputs
-		if len(filteredInputs) == 1 {
-			return filteredInputs[0]
-		}
-	}
 
-	return inputs[0]
+		return filteredInputs
+	})
 }

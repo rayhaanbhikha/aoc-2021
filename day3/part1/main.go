@@ -15,12 +15,16 @@ func main() {
 	epsilonRateVals := make([]string, 0)
 
 	for i := 0; i < len(inputs[0]); i++ {
-		sum := 0
+		zeroBits := 0
+		oneBits := 0
 		for j := 0; j < len(inputs); j++ {
-			num, _ := strconv.Atoi(string(inputs[j][i]))
-			sum += num
+			if string(inputs[j][i]) == "0" {
+				zeroBits++
+			} else {
+				oneBits++
+			}
 		}
-		if sum > (len(inputs) / 2) {
+		if oneBits > zeroBits {
 			gammaRateVals = append(gammaRateVals, "1")
 			epsilonRateVals = append(epsilonRateVals, "0")
 		} else {

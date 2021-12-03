@@ -110,7 +110,7 @@ import (
 
 func main() {
 	data, _ := ioutil.ReadFile("../input")
-	inputs := strings.Split(string(data), "\n")
+	inputs := strings.Split(strings.TrimSpace(string(data)), "\n")
 
 	fmt.Println(inputs)
 }
