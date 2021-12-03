@@ -20,7 +20,27 @@ func main() {
 	fmt.Println(epsilonRate * gammaRate)
 }
 
-func compute(inputs []string, inputsFilter func(oneBits, zeroBits, bitIndex int, inputs []string) []string) string {
+func findOxygenGeneratorRating(inputs []string) string {
+	return compute(inputs, func(oneBits, zeroBits int) rune {
+		val := '0'
+		if oneBits >= zeroBits {
+			val = '1'
+		}
+		return val
+	})
+}
+
+func findCO2ScrubberRating(inputs []string) string {
+	return compute(inputs, func(oneBits, zeroBits int) rune {
+		val := '1'
+		if zeroBits <= oneBits {
+			val = '0'
+		}
+		return val
+	})
+}
+
+func compute(inputs []string, computeVal func(oneBits, zeroBits int) rune) string {
 	for i := 0; i < len(inputs[0]); i++ {
 		zeroBits := 0
 		oneBits := 0
@@ -31,7 +51,8 @@ func compute(inputs []string, inputsFilter func(oneBits, zeroBits, bitIndex int,
 				oneBits++
 			}
 		}
-		inputs = inputsFilter(oneBits, zeroBits, i, inputs)
+		val := computeVal(oneBits, zeroBits)
+		inputs = filterInputsByBit(inputs, i, val)
 		if len(inputs) == 1 {
 			return inputs[0]
 		}
@@ -40,39 +61,14 @@ func compute(inputs []string, inputsFilter func(oneBits, zeroBits, bitIndex int,
 	return ""
 }
 
-func findOxygenGeneratorRating(inputs []string) string {
-	return compute(inputs, func(oneBits, zeroBits, bitIndex int, inputs []string) []string {
-		val := "0"
-		if oneBits >= zeroBits {
-			val = "1"
+func filterInputsByBit(inputs []string, bitIndex int, val rune) []string {
+	filteredInputs := make([]string, 0)
+
+	for _, input := range inputs {
+		if val == rune(input[bitIndex]) {
+			filteredInputs = append(filteredInputs, input)
 		}
+	}
 
-		filteredInputs := make([]string, 0)
-
-		for _, input := range inputs {
-			if val == string(input[bitIndex]) {
-				filteredInputs = append(filteredInputs, input)
-			}
-		}
-
-		return filteredInputs
-	})
-}
-
-func findCO2ScrubberRating(inputs []string) string {
-	return compute(inputs, func(oneBits, zeroBits, bitIndex int, inputs []string) []string {
-		val := '1'
-		if zeroBits <= oneBits {
-			val = '0'
-		}
-		filteredInputs := make([]string, 0)
-		for _, input := range inputs {
-			s := rune(input[bitIndex])
-			if s == val {
-				filteredInputs = append(filteredInputs, input)
-			}
-		}
-
-		return filteredInputs
-	})
+	return filteredInputs
 }
