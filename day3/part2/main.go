@@ -14,10 +14,10 @@ func main() {
 	oxygenGeneratorRating := findOxygenGeneratorRating(inputs)
 	co2ScrubberRating := findCO2ScrubberRating(inputs)
 
-	gammaRate, _ := strconv.ParseInt(oxygenGeneratorRating, 2, 64)
-	epsilonRate, _ := strconv.ParseInt(co2ScrubberRating, 2, 64)
+	oxygenRate, _ := strconv.ParseInt(oxygenGeneratorRating, 2, 64)
+	co2ScrubberRate, _ := strconv.ParseInt(co2ScrubberRating, 2, 64)
 
-	fmt.Println(epsilonRate * gammaRate)
+	fmt.Println(co2ScrubberRate * oxygenRate)
 }
 
 func findOxygenGeneratorRating(inputs []string) string {
