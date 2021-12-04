@@ -1,3 +1,3 @@
 build_binary:
-	go build -o day-template ./template
+	go build -o aoc ./aoc-cli
 

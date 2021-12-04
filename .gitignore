@@ -1,2 +1,3 @@
-day-template
-template/day*
+aoc-cli/day*
+.session
+aoc
