@@ -76,13 +76,16 @@ func createForNode(rootDirName string, inputData []byte) error {
 		return err
 	}
 
-	files := []string{
+	filePaths := []string{
 		path.Join(rootDirName, "part1.js"),
 		path.Join(rootDirName, "part2.js"),
 	}
 
-	for _, file := range files {
-		if err := os.WriteFile(file, defaultFileData, os.ModePerm); err != nil {
+	for _, filePath := range filePaths {
+		if _, err := os.Stat(filePath); err == nil {
+			return fmt.Errorf("file %s already exists", filePath)
+		}
+		if err := os.WriteFile(filePath, defaultFileData, os.ModePerm); err != nil {
 			return err
 		}
 	}
@@ -99,6 +102,9 @@ func createForGolang(rootDirName string, inputData []byte) error {
 	}
 
 	for _, dir := range directories {
+		if _, err := os.Stat(dir); err == nil {
+			return fmt.Errorf("directory %s already exists", dir)
+		}
 		if err := createDirectory(dir, defaultFileData); err != nil {
 			return err
 		}
