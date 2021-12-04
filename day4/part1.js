@@ -5,6 +5,7 @@ const data = readFileSync('./input', { encoding: 'utf-8' }).trim().split('\n');
 class BingoBoard {
   constructor() {
     this.grid = [];
+    this.hasWonGame = false;
   }
 
   markNum(num) {
@@ -15,6 +16,9 @@ class BingoBoard {
         }
       }
     }
+    if (this.hasWon()) {
+      this.hasWonGame = true;
+    };
   }
 
   addRow(numbers) {
@@ -77,7 +81,7 @@ for (const bingoDataRow of data) {
 for (const bingoNum of bingoNumbers) {
   bingoBoards.forEach(bingoBoard => bingoBoard.markNum(bingoNum))
   for (const bingoBoard of bingoBoards) {
-    if (bingoBoard.hasWon()) {
+    if (bingoBoard.hasWonGame) {
       console.log(bingoBoard.sumOfUnmarkedNums() * bingoNum)
       return
     }
