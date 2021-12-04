@@ -11,6 +11,16 @@ import (
 
 type Language int
 
+func (l Language) String() string {
+	switch l {
+	case NODE:
+		return "node"
+	case GOLANG:
+		return "go"
+	}
+	return "unknown"
+}
+
 const (
 	GOLANG Language = iota
 	NODE
@@ -39,7 +49,7 @@ func init() {
 }
 
 func main() {
-	rootDirName := fmt.Sprintf("day%s", day)
+	rootDirName := fmt.Sprintf("day%s-%s", day, codeType)
 
 	inputData, err := fetchInput(day)
 	if err != nil {
