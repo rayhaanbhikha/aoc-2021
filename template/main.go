@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,39 +12,36 @@ import (
 	"github.com/rayhaanbhikha/aoc-2021/template/language"
 )
 
-var codeType language.Language
-var day string
+var languageTemplate string
+var day int
 
 func init() {
-	codeType = language.GOLANG
+	flag.StringVar(&languageTemplate, "lang", "go", "Specify language template to generate")
+	flag.IntVar(&day, "day", 0, "Advent of code calenday day")
 
-	if len(os.Args) < 1 {
-		log.Fatal("Missing day")
+	flag.Parse()
+
+	if day == 0 {
+		log.Fatal(errors.New("day 0 does not exist"))
 	}
 
-	day = os.Args[1]
-
-	if len(os.Args) > 2 {
-		switch os.Args[2] {
-		case "node":
-			codeType = language.NODE
-		case "go":
-			codeType = language.GOLANG
-		default:
-			log.Fatal("Language unknown")
-		}
-	}
+	fmt.Println("Day: ", day)
+	fmt.Println("Language: ", languageTemplate)
 }
 
 func main() {
-	rootDirName := fmt.Sprintf("day%s-%s", day, codeType)
+	lang, err := language.NewLanguage(languageTemplate)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rootDirName := fmt.Sprintf("day%d-%s", day, lang)
 
 	if _, err := os.Stat(rootDirName); err == nil {
 		log.Fatal(fmt.Errorf("%s already exists", rootDirName))
 	}
 
-	err := os.Mkdir(rootDirName, os.ModePerm)
-	if err != nil {
+	if err = os.Mkdir(rootDirName, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 
@@ -51,22 +50,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	switch codeType {
-	case language.NODE:
-		if err := language.NewNodeLanguage(rootDirName, inputData); err != nil {
-			log.Fatal(err)
-		}
-	case language.GOLANG:
-		if err := language.NewGoLanguage(rootDirName, inputData); err != nil {
-			log.Fatal(err)
-		}
+	if err := lang.Create(rootDirName, inputData); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func fetchInput(day string) ([]byte, error) {
+func fetchInput(day int) ([]byte, error) {
 	client := &http.Client{}
 
-	url := fmt.Sprintf("https://adventofcode.com/2021/day/%s/input", day)
+	url := fmt.Sprintf("https://adventofcode.com/2021/day/%d/input", day)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
