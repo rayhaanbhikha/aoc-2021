@@ -24,8 +24,8 @@ class Vector {
       for (let i = min; i <= max; i++) {
         coords.push({ x: i, y: this.p1.y })
       }
-    }
-    else {
+    } else {
+      // diagonal line
       const m = (this.p2.y - this.p1.y) / (this.p2.x - this.p1.x);
       let newX = this.p1.x;
       let newY = this.p1.y;
