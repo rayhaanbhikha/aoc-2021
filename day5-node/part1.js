@@ -36,10 +36,7 @@ const vectors = data.map(val => {
   const [x1, y1] = v1.split(",");
   const [x2, y2] = v2.split(",");
   const [nx1, ny1, nx2, ny2] = [Number(x1), Number(y1),  Number(x2), Number(y2)]
-  const currentMaxX = Math.max(nx1, nx2);
-  const currentMaxY = Math.max(ny1, ny2);
-  const currentMax = Math.max(currentMaxX, currentMaxY)
-  maxN = Math.max(maxN, currentMax);
+  maxN = Math.max(maxN, nx1, ny1, nx2, ny2);
   return new Vector({ x: nx1, y: ny1 }, { x: nx2, y: ny2 })
 })
 
