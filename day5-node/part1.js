@@ -12,25 +12,17 @@ class Vector {
     const coords = [];
     if (this.p1.x === this.p2.x) {
       // vertical line
-      if (this.p1.y > this.p2.y) {
-        for (let i = this.p2.y; i <= this.p1.y; i++) {
-          coords.push({ x: this.p1.x, y: i })
-        }
-      } else {
-        for (let i = this.p1.y; i <= this.p2.y; i++) {
-          coords.push({ x: this.p1.x, y: i })
-        }
+      const min = Math.min(this.p1.y, this.p2.y);
+      const max = Math.max(this.p1.y, this.p2.y);
+      for (let i = min; i <= max; i++) {
+        coords.push({ x: this.p1.x, y: i })
       }
     } else if (this.p1.y === this.p2.y) {
       // horizontal line
-      if (this.p1.x > this.p2.x) {
-        for (let i = this.p2.x; i <= this.p1.x; i++) {
-          coords.push({ x: i, y: this.p1.y })
-        }
-      } else {
-        for (let i = this.p1.x; i <= this.p2.x; i++) {
-          coords.push({ x: i, y: this.p1.y })
-        }
+      const min = Math.min(this.p1.x, this.p2.x);
+      const max = Math.max(this.p1.x, this.p2.x);
+      for (let i = min; i <= max; i++) {
+        coords.push({ x: i, y: this.p1.y })
       }
     }
     return coords
