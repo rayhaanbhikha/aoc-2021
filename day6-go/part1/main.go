@@ -7,6 +7,28 @@ import (
 	"strings"
 )
 
+type Fishes struct {
+	fishes []*Fish
+}
+
+func (f *Fishes) add(fish *Fish) {
+	f.fishes = append(f.fishes, fish)
+}
+
+func (f *Fishes) addNewFish() {
+	newFish := &Fish{daysRemaining: 8}
+	f.add(newFish)
+}
+
+func (f *Fishes) nextDay() {
+	for _, fish := range f.fishes {
+		fish.nextDay()
+		if fish.shouldAddFish {
+			f.addNewFish()
+		}
+	}
+}
+
 type Fish struct {
 	daysRemaining int
 	shouldAddFish bool
@@ -26,20 +48,15 @@ func main() {
 	data, _ := ioutil.ReadFile("../input")
 	inputs := strings.Split(strings.TrimSpace(string(data)), ",")
 
-	fishes := make([]*Fish, 0)
+	fishes := &Fishes{}
 	for _, daysRemaining := range inputs {
 		daysRemainingN, _ := strconv.Atoi(daysRemaining)
-		fishes = append(fishes, &Fish{daysRemaining: daysRemainingN})
+		fishes.add(&Fish{daysRemaining: daysRemainingN})
 	}
 
-	for i := 0; i < 256; i++ {
-		for _, fish := range fishes {
-			fish.nextDay()
-			if fish.shouldAddFish {
-				fishes = append(fishes, &Fish{daysRemaining: 8})
-			}
-		}
+	for i := 0; i < 80; i++ {
+		fishes.nextDay()
 	}
 
-	fmt.Println(len(fishes))
+	fmt.Println(len(fishes.fishes))
 }
