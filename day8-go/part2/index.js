@@ -5,7 +5,6 @@ const data = readFileSync('../input', { encoding: 'utf-8' }).trim().split('\n').
 	return { patterns: patterns.trim().split(" "), fourDigitNum: fourDigitNum.trim().split(" ") }
 });
 
-
 class Num {
 	constructor(chars, value) {
 		this.chars = new Set(chars);
@@ -64,12 +63,6 @@ class Num {
 	}
 }
 
-
-// const { patterns, fourDigitNum } = {
-// 	patterns: ['acedgfb', 'cdfbe', 'gcdfa', 'fbcad', 'dab', 'cefabd', 'cdfgeb', 'eafb', 'cagedb', 'ab'],
-// 	fourDigitNum: ['cdfeb', 'fcadb', 'cdfeb', 'cdbaf',]
-// };
-
 let sum = 0;
 
 for (const { patterns, fourDigitNum } of data) {
@@ -77,9 +70,6 @@ for (const { patterns, fourDigitNum } of data) {
 }
 
 console.log(sum);
-
-
-
 
 function parseNum(patterns, fourDigitNum) {
 
