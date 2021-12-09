@@ -14,22 +14,19 @@ type CaveAreaLocation struct {
 }
 
 func (c *CaveAreaLocation) computeBasinSize() int {
-	currentSize := 1
-	key := fmt.Sprintf("%d:%d", c.col, c.row)
-	visitedLocations := map[string]struct{}{
-		key: struct{}{},
-	}
+	currentSize := 0
+	visitedLocations := make(map[string]struct{})
 	queue := findNeighbours(c.col, c.row, c.caveArea)
 
 	for len(queue) != 0 {
 		newLocation := queue[0]
 		queue = queue[1:]
-		if _, ok := visitedLocations[fmt.Sprintf("%d:%d", newLocation.col, newLocation.row)]; ok {
+		key := fmt.Sprintf("%d:%d", newLocation.col, newLocation.row)
+		if _, ok := visitedLocations[key]; ok {
 			continue
 		}
-		visitedLocations[fmt.Sprintf("%d:%d", newLocation.col, newLocation.row)] = struct{}{}
-		val := c.caveArea[newLocation.row][newLocation.col]
-		if val == 9 {
+		visitedLocations[key] = struct{}{}
+		if c.caveArea[newLocation.row][newLocation.col] == 9 {
 			continue
 		}
 		currentSize++
