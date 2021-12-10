@@ -31,10 +31,8 @@ function filterIncompleteLines(line) {
     }
     
     if (closingBrackets.has(bracket)) {
-      // it's a closing bracket
       if (bracket !== matchingClosingBracket) {
-        // corrupted.
-        // console.log("Corrupted", line.join(""));
+        // it's a corrupted line bracket
         return null;
       }
       bracketStack.pop();
