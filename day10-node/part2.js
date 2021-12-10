@@ -24,11 +24,6 @@ function filterIncompleteLines(line) {
   for (const bracket of line) {
     const lastBracket = bracketStack.at(-1);
     const matchingClosingBracket = closingBracket[lastBracket];
-
-    if (bracketStack.length === 0) {
-      bracketStack.push(bracket);
-      continue;
-    }
     
     if (closingBrackets.has(bracket)) {
       if (bracket !== matchingClosingBracket) {
@@ -49,8 +44,10 @@ function filterIncompleteLines(line) {
   return null;
 }
 
-function computeScore(brackets) {
-  return brackets.reverse().reduce((sum, openBracket) => {
+function computeScore(line) {
+  const filteredLine = filterIncompleteLines(line)
+  if (!filteredLine) return -1;
+  return filteredLine.reverse().reduce((sum, openBracket) => {
     const matchingClosingBracket = closingBracket[openBracket];
     sum *= 5
     sum += bracketScore[matchingClosingBracket]
@@ -58,11 +55,7 @@ function computeScore(brackets) {
   }, 0)
 }
 
-const scores = lines.map(line => {
-  const result = filterIncompleteLines(line)
-  if (!result) return false;
-  return computeScore(result);
-}).filter(f => f !== false).sort((a, b) => a - b);
+const scores = lines.map(computeScore).filter(score => score >= 0).sort((a, b) => a - b);
 
 const middleIndex = Math.floor(scores.length / 2);
 

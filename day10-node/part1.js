@@ -25,16 +25,9 @@ function findCorruptedClosingCharacter(line) {
     const lastBracket = bracketStack.at(-1);
     const matchingClosingBracket = closingBracket[lastBracket];
 
-    if (bracketStack.length === 0) {
-      bracketStack.push(bracket);
-      continue;
-    }
-    
     if (closingBrackets.has(bracket)) {
-      // it's a closing bracket
       if (bracket !== matchingClosingBracket) {
         // corrupted.
-        // console.log("Corrupted", line.join(""));
         return bracket;
       }
       bracketStack.pop();
@@ -43,10 +36,6 @@ function findCorruptedClosingCharacter(line) {
 
     bracketStack.push(bracket);
   }
-
-  // if (bracketStack.length > 0) {
-  //   console.log(bracketStack)
-  // }
 
   return null;
 }
@@ -58,8 +47,6 @@ const mappings = lines.reduce((acc, line) => {
   }
   return acc
 }, {})
-
-console.log(mappings);
 
 const score = Object.entries(mappings).reduce((sum, [bracket, occurrence]) => sum += (bracketScore[bracket] * occurrence), 0)
 
