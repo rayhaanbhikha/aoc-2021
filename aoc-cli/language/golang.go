@@ -20,8 +20,11 @@ func (g *GoLanguage) create(inputData []byte) error {
 		return err
 	}
 
-	err := g.createInputFile(inputData)
-	if err != nil {
+	if err := g.createInputFile(inputData); err != nil {
+		return err
+	}
+
+	if err := g.createSampleFile(); err != nil {
 		return err
 	}
 
@@ -51,6 +54,10 @@ func (g *GoLanguage) createDirectory(dirName string, data []byte) error {
 
 func (g *GoLanguage) createInputFile(inputData []byte) error {
 	return os.WriteFile(path.Join(g.basePath, "input"), inputData, os.ModePerm)
+}
+
+func (g *GoLanguage) createSampleFile() error {
+	return os.WriteFile(path.Join(g.basePath, "sample"), []byte(""), os.ModePerm)
 }
 
 func (g *GoLanguage) template() []byte {

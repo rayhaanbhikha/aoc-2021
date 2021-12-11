@@ -20,8 +20,11 @@ func (n *NodeLanguage) create(inputData []byte) error {
 		return err
 	}
 
-	err := n.createInputFile(inputData)
-	if err != nil {
+	if err := n.createInputFile(inputData); err != nil {
+		return err
+	}
+
+	if err := n.createSampleFile(); err != nil {
 		return err
 	}
 
@@ -41,6 +44,10 @@ func (n *NodeLanguage) create(inputData []byte) error {
 
 func (n *NodeLanguage) createInputFile(inputData []byte) error {
 	return os.WriteFile(path.Join(n.basePath, "input"), inputData, os.ModePerm)
+}
+
+func (n *NodeLanguage) createSampleFile() error {
+	return os.WriteFile(path.Join(n.basePath, "sample"), []byte(""), os.ModePerm)
 }
 
 func (n *NodeLanguage) template() []byte {
