@@ -36,17 +36,17 @@ func (n *Number) signalLen() int {
 	return len(n.signal)
 }
 
-func (n *Number) getVal(signal string) (string, bool) {
+func (n *Number) getVal(signal string) string {
 	if len(signal) != len(n.signal) {
-		return "", false
+		return ""
 	}
 
 	for _, s := range signal {
 		if _, ok := n.signalCharsMap[string(s)]; !ok {
-			return "", false
+			return ""
 		}
 	}
-	return n.val, true
+	return n.val
 }
 
 func (n *Number) has(otherNum *Number) bool {
@@ -73,7 +73,7 @@ func (n *Number) intersects(otherNum *Number) int {
 }
 
 func main() {
-	data, _ := ioutil.ReadFile("../sample2")
+	data, _ := ioutil.ReadFile("../input")
 	input := strings.Split(strings.TrimSpace(string(data)), "\n")
 
 	total := 0
@@ -94,8 +94,7 @@ func decodeFourDigits(signals, fourDigitsSignal []string) int {
 	val := make([]string, 0)
 	for _, digitSignal := range fourDigitsSignal {
 		for _, uniqueNum := range uniqueNumbers {
-			parseNum, ok := uniqueNum.getVal(digitSignal)
-			if ok {
+			if parseNum := uniqueNum.getVal(digitSignal); parseNum != "" {
 				val = append(val, parseNum)
 				break
 			}
