@@ -106,18 +106,17 @@ func NewOctopusGrid(rawGrid []string) *OctopusGrid {
 }
 
 func (og *OctopusGrid) step() bool {
-	// loop through octopuses and increment energy levels by one.
+	// Increment all by one.
 	flashedOctopi := make([]*Octopus, 0)
-	for _, row := range og.grid {
-		for _, oct := range row {
-			hasFlashed := oct.incrementEnergyLevel()
-			if hasFlashed {
-				og.flashCount++
-				flashedOctopi = append(flashedOctopi, oct)
-			}
+	og.forEach(func(octopus *Octopus) {
+		hasFlashed := octopus.incrementEnergyLevel()
+		if hasFlashed {
+			og.flashCount++
+			flashedOctopi = append(flashedOctopi, octopus)
 		}
-	}
+	})
 
+	// check flashes
 	for _, flashedOctopus := range flashedOctopi {
 		og.incrementAdjacentOctopi(flashedOctopus)
 	}
@@ -127,53 +126,38 @@ func (og *OctopusGrid) step() bool {
 	}
 
 	sumOfFlashedOctopus := 0
-	for _, row := range og.grid {
-		for _, octopus := range row {
-			if octopus.hasFlashed {
-				sumOfFlashedOctopus++
-			}
+	og.forEach(func(octopus *Octopus) {
+		if octopus.hasFlashed {
+			sumOfFlashedOctopus++
 		}
-	}
+	})
 
 	if sumOfFlashedOctopus == len(og.grid)*len(og.grid[0]) {
 		return true
 	}
 
-	// reset all flashes before moving.
-	for _, row := range og.grid {
-		for _, oct := range row {
-			oct.reset()
-		}
-	}
-	// if any flash compute their neighbours and increment them by 1.
+	og.forEach(func(octopus *Octopus) {
+		octopus.reset()
+	})
+
 	return false
 }
 
 func (og *OctopusGrid) incrementAdjacentOctopi(octopus *Octopus) {
-	// flashedOctopi := make([]*Octopus, 0)
-
 	neighbours := og.findNeighbours(octopus)
 	for _, neighbourOctopus := range neighbours {
 		hasFlashed := neighbourOctopus.incrementEnergyLevel()
 		if hasFlashed {
 			og.flashCount++
-			// flashedOctopi = append(flashedOctopi, neighbourOctopus)
 			og.incrementAdjacentOctopi(neighbourOctopus)
 		}
 	}
-
 }
 
-func (og *OctopusGrid) incrementOctopushEnergyLevels(octopi []*Octopus) {
-	for _, octopus := range octopi {
-		if octopus.hasFlashed {
-			continue
-		}
-		hasFlashed := octopus.incrementEnergyLevel()
-		if hasFlashed {
-			og.flashCount++
-			neighbours := og.findNeighbours(octopus)
-			og.incrementOctopushEnergyLevels(neighbours)
+func (og *OctopusGrid) forEach(cb func(octopus *Octopus)) {
+	for _, row := range og.grid {
+		for _, oct := range row {
+			cb(oct)
 		}
 	}
 }
