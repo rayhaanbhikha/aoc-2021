@@ -73,7 +73,7 @@ func (n *Number) intersects(otherNum *Number) int {
 }
 
 func main() {
-	data, _ := ioutil.ReadFile("../input")
+	data, _ := ioutil.ReadFile("../sample2")
 	input := strings.Split(strings.TrimSpace(string(data)), "\n")
 
 	total := 0
@@ -89,7 +89,6 @@ func main() {
 }
 
 func decodeFourDigits(signals, fourDigitsSignal []string) int {
-	// fmt.Println(signals, fourDigits)
 	uniqueNumbers := parseSignals(signals)
 
 	val := make([]string, 0)
@@ -109,10 +108,8 @@ func decodeFourDigits(signals, fourDigitsSignal []string) int {
 func parseSignals(signals []string) map[string]*Number {
 	uniqueNums, remainingNums := generateNumbers(signals)
 
-	remainingSignalsByLength := filterNumbersByLens(remainingNums)
-
-	filterLengthFive(uniqueNums, remainingSignalsByLength[5])
-	filterLengthSix(uniqueNums, remainingSignalsByLength[6])
+	filterLengthFive(uniqueNums, remainingNums["5"])
+	filterLengthSix(uniqueNums, remainingNums["6"])
 
 	return uniqueNums
 }
@@ -145,19 +142,9 @@ func filterLengthSix(uniqueNums map[string]*Number, nums []*Number) {
 	}
 }
 
-func filterNumbersByLens(numbers []*Number) map[int][]*Number {
-	numbersMap := make(map[int][]*Number)
-
-	for _, num := range numbers {
-		n := num.signalLen()
-		numbersMap[n] = append(numbersMap[n], num)
-	}
-
-	return numbersMap
-}
-
-func generateNumbers(signals []string) (uniqueNums map[string]*Number, remaining []*Number) {
+func generateNumbers(signals []string) (uniqueNums map[string]*Number, remainingNumsByLen map[string][]*Number) {
 	uniqueNums = make(map[string]*Number)
+	remainingNumsByLen = make(map[string][]*Number)
 
 	for _, signal := range signals {
 		num := NewNumber(signal)
@@ -174,7 +161,8 @@ func generateNumbers(signals []string) (uniqueNums map[string]*Number, remaining
 		if num.hasVal {
 			uniqueNums[num.val] = num
 		} else {
-			remaining = append(remaining, num)
+			key := fmt.Sprintf("%d", num.signalLen())
+			remainingNumsByLen[key] = append(remainingNumsByLen[key], num)
 		}
 	}
 
