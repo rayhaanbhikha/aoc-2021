@@ -105,19 +105,18 @@ func NewOctopusGrid(rawGrid []string) *OctopusGrid {
 	return &OctopusGrid{grid: grid}
 }
 
-func (og *OctopusGrid) step() {
-	// loop through octopuses and increment energy levels by one.
+func (og *OctopusGrid) step() bool {
+	// Increment all by one.
 	flashedOctopi := make([]*Octopus, 0)
-	for _, row := range og.grid {
-		for _, oct := range row {
-			hasFlashed := oct.incrementEnergyLevel()
-			if hasFlashed {
-				og.flashCount++
-				flashedOctopi = append(flashedOctopi, oct)
-			}
+	og.forEach(func(octopus *Octopus) {
+		hasFlashed := octopus.incrementEnergyLevel()
+		if hasFlashed {
+			og.flashCount++
+			flashedOctopi = append(flashedOctopi, octopus)
 		}
-	}
+	})
 
+	// check flashes
 	for _, flashedOctopus := range flashedOctopi {
 		og.incrementAdjacentOctopi(flashedOctopus)
 	}
@@ -126,13 +125,19 @@ func (og *OctopusGrid) step() {
 		og.print()
 	}
 
-	// reset all flashes before moving.
+	og.forEach(func(octopus *Octopus) {
+		octopus.reset()
+	})
+
+	return false
+}
+
+func (og *OctopusGrid) forEach(cb func(octopus *Octopus)) {
 	for _, row := range og.grid {
 		for _, oct := range row {
-			oct.reset()
+			cb(oct)
 		}
 	}
-	// if any flash compute their neighbours and increment them by 1.
 }
 
 func (og *OctopusGrid) incrementAdjacentOctopi(octopus *Octopus) {
