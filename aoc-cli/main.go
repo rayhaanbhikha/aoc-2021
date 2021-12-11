@@ -7,13 +7,36 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/rayhaanbhikha/aoc-2021/aoc-cli/language"
+	"github.com/rayhaanbhikha/aoc-2021/aoc-cli/session"
 	"github.com/urfave/cli/v2"
 )
 
+var questions = []*survey.Question{
+	{
+		Name:     "day",
+		Prompt:   &survey.Input{Message: "What day?"},
+		Validate: survey.Required, // TODO: can check it's a number.
+	},
+	{
+		Name: "language",
+		Prompt: &survey.Select{
+			Message: "Choose a language",
+			Options: []string{"Go", "Node"},
+			Default: "Go",
+		},
+	},
+}
+
 func main() {
+
+	sess, err := session.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	app := &cli.App{
 		Name: "AOC cli to generate ready to go code templates",
 		Commands: []*cli.Command{
@@ -29,28 +52,27 @@ func main() {
 				},
 				Usage: "Set Session token (stored as cookie in browser)",
 				Action: func(c *cli.Context) error {
-					return setToken(c.String("token"))
+					return sess.SetToken(c.String("token"))
 				},
 			},
 			{
-				Name: "new",
-				Flags: []cli.Flag{
-					&cli.IntFlag{
-						Name:     "day",
-						Required: true,
-						Aliases:  []string{"d"},
-						Usage:    "Advent of code calenday day",
-					},
-					&cli.StringFlag{
-						Name:    "language",
-						Value:   "go",
-						Aliases: []string{"l"},
-						Usage:   "language to generate AOC code template",
-					},
-				},
+				Name:  "new",
 				Usage: "Create new code template",
 				Action: func(c *cli.Context) error {
-					return runApp(c.Int("day"), c.String("language"))
+					if err := sess.Init(); err != nil {
+						return err
+					}
+
+					answers := struct {
+						Day      int
+						Language string
+					}{}
+
+					if err := survey.Ask(questions, &answers); err != nil {
+						return err
+					}
+
+					return runApp(answers.Day, answers.Language, sess)
 				},
 			},
 		},
@@ -61,7 +83,7 @@ func main() {
 	}
 }
 
-func runApp(day int, languageTemplate string) error {
+func runApp(day int, languageTemplate string, sess *session.Session) error {
 	shouldCleanup := false
 
 	lang, err := language.NewLanguage(languageTemplate)
@@ -72,7 +94,7 @@ func runApp(day int, languageTemplate string) error {
 	rootDirName := fmt.Sprintf("day%d-%s", day, lang)
 
 	if _, err := os.Stat(rootDirName); err == nil {
-		log.Fatal(fmt.Errorf("%s already exists", rootDirName))
+		return fmt.Errorf("%s already exists", rootDirName)
 	}
 
 	if err = os.Mkdir(rootDirName, os.ModePerm); err != nil {
@@ -90,7 +112,7 @@ func runApp(day int, languageTemplate string) error {
 		}
 	}()
 
-	inputData, err := fetchInput(day)
+	inputData, err := fetchInput(day, sess.GetToken())
 	if err != nil {
 		shouldCleanup = true
 		return err
@@ -104,17 +126,12 @@ func runApp(day int, languageTemplate string) error {
 	return nil
 }
 
-func fetchInput(day int) ([]byte, error) {
+func fetchInput(day int, sessionToken string) ([]byte, error) {
 	client := &http.Client{}
 
 	url := fmt.Sprintf("https://adventofcode.com/2021/day/%d/input", day)
 
 	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	sessionToken, err := readToken()
 	if err != nil {
 		return nil, err
 	}
@@ -136,20 +153,4 @@ func fetchInput(day int) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func setToken(token string) error {
-	return os.WriteFile(".session", []byte(token), os.ModePerm)
-}
-
-func readToken() (string, error) {
-	data, err := os.ReadFile(".session")
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", errors.New("need to set session token by running: aoc session -t <token>")
-		}
-
-		return "", err
-	}
-	return strings.TrimSpace(string(data)), err
 }
