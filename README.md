@@ -14,6 +14,6 @@ This will generate the default code.
 
 ./aoc session -t <token> # sets token
 
-./aoc new -d <day> -l <node|golang(default)> # creates directory using nodejs or golang template
+./aoc new
 
 ```
