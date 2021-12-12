@@ -5,7 +5,27 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
 )
+
+func main() {
+	data, _ := ioutil.ReadFile("../input")
+	input := strings.Split(strings.TrimSpace(string(data)), "\n")
+
+	start := time.Now()
+
+	total := 0
+
+	for _, line := range input {
+		result := strings.Split(line, "|")
+		signals := strings.Split(strings.TrimSpace(result[0]), " ")
+		fourDigits := strings.Split(strings.TrimSpace(result[1]), " ")
+		total += decodeFourDigits(signals, fourDigits)
+	}
+	end := time.Since(start)
+	fmt.Println("Time taken: ", end.Microseconds())
+	fmt.Println(total)
+}
 
 type Number struct {
 	signal         []string
@@ -70,22 +90,6 @@ func (n *Number) intersects(otherNum *Number) int {
 	}
 
 	return len(charMapCopy)
-}
-
-func main() {
-	data, _ := ioutil.ReadFile("../input")
-	input := strings.Split(strings.TrimSpace(string(data)), "\n")
-
-	total := 0
-
-	for _, line := range input {
-		result := strings.Split(line, "|")
-		signals := strings.Split(strings.TrimSpace(result[0]), " ")
-		fourDigits := strings.Split(strings.TrimSpace(result[1]), " ")
-		total += decodeFourDigits(signals, fourDigits)
-	}
-
-	fmt.Println(total)
 }
 
 func decodeFourDigits(signals, fourDigitsSignal []string) int {
