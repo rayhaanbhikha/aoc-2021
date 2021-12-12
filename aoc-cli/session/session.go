@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-const DEFAULT_FILENAME = ".session"
+const DEFAULT_FILENAME = ".aoc-session"
 
 type Session struct {
 	value    string
@@ -34,7 +34,7 @@ func (s *Session) serialise() error {
 }
 
 func (s *Session) deserialise() error {
-	return os.WriteFile(s.filePath, []byte(s.value), os.ModePerm)
+	return os.WriteFile(s.filePath, []byte(s.value), os.FileMode(0600))
 }
 
 func (s *Session) Init() error {
@@ -51,7 +51,7 @@ func (s *Session) GetToken() string {
 }
 
 func New() (*Session, error) {
-	currentDir, err := os.Getwd()
+	currentDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
