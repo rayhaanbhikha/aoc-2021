@@ -9,21 +9,40 @@ import (
 )
 
 func main() {
-	data, _ := ioutil.ReadFile("../input")
+	data, _ := ioutil.ReadFile("../input-big")
 	input := strings.Split(strings.TrimSpace(string(data)), "\n")
 
 	start := time.Now()
 
 	total := 0
 
+	// Synchronous solution
+	// for _, line := range input {
+	// 	result := strings.Split(line, "|")
+	// 	signals := strings.Split(strings.TrimSpace(result[0]), " ")
+	// 	fourDigits := strings.Split(strings.TrimSpace(result[1]), " ")
+	// 	total += decodeFourDigits(signals, fourDigits)
+	// }
+
+	// Concurrent solution
+	outputChan := make(chan int)
+	go func() {
+		for output := range outputChan {
+			total += output
+		}
+	}()
+
 	for _, line := range input {
-		result := strings.Split(line, "|")
-		signals := strings.Split(strings.TrimSpace(result[0]), " ")
-		fourDigits := strings.Split(strings.TrimSpace(result[1]), " ")
-		total += decodeFourDigits(signals, fourDigits)
+		go func(line string, outputChan chan int) {
+			result := strings.Split(line, "|")
+			signals := strings.Split(strings.TrimSpace(result[0]), " ")
+			fourDigits := strings.Split(strings.TrimSpace(result[1]), " ")
+			outputChan <- decodeFourDigits(signals, fourDigits)
+		}(line, outputChan)
 	}
+
 	end := time.Since(start)
-	fmt.Println("Time taken: ", end.Microseconds())
+	fmt.Println("Time taken: ", end.Milliseconds())
 	fmt.Println(total)
 }
 
