@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/rayhaanbhikha/aoc-2021/aoc-cli/language"
@@ -14,10 +15,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var defaultDay = fmt.Sprintf("%d", time.Now().Day())
+var defaultLanguage = "Go"
+
 var questions = []*survey.Question{
 	{
 		Name:     "day",
-		Prompt:   &survey.Input{Message: "What day?"},
+		Prompt:   &survey.Input{Message: "What day?", Default: defaultDay},
 		Validate: survey.Required, // TODO: can check it's a number.
 	},
 	{
@@ -25,7 +29,7 @@ var questions = []*survey.Question{
 		Prompt: &survey.Select{
 			Message: "Choose a language",
 			Options: []string{"Go", "Node"},
-			Default: "Go",
+			Default: defaultLanguage,
 		},
 	},
 }
