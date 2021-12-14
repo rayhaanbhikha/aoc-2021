@@ -45,18 +45,14 @@ func computeScore(polymerTemplate string) (int, int) {
 }
 
 func implementStep(polymerTemplate string, rules map[string]string) string {
-	s := strings.Split(polymerTemplate, "")
-	for i := 0; i < len(s)-1; i++ {
-		sChar1 := s[i]
-		sChar2 := s[i+1]
-		key := fmt.Sprintf("%s%s", sChar1, sChar2)
+	for i := 0; i < len(polymerTemplate)-1; i++ {
+		key := polymerTemplate[i : i+2]
 		if elementToAdd, ok := rules[key]; ok {
-			remainingS := append([]string{elementToAdd}, s[i+1:]...)
-			s = append(s[:i+1], remainingS...)
+			polymerTemplate = polymerTemplate[:i+1] + elementToAdd + polymerTemplate[i+1:]
 			i++
 		}
 	}
-	return strings.Join(s, "")
+	return polymerTemplate
 }
 
 func formatInsertionRules(rules string) map[string]string {
