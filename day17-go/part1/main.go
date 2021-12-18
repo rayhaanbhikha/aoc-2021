@@ -59,13 +59,13 @@ func (p *Probe) isOutsideTargetArea(x, y int) bool {
 
 func main() {
 	// maxX, minX, minY, maxY := 20, 30, -10, -5
-	maxX, minX, minY, maxY := 179, 201, -109, -63
-	probe := NewProbe(maxX, minX, minY, maxY)
+	minX, maxX, minY, maxY := 179, 201, -109, -63
+	probe := NewProbe(minX, maxX, minY, maxY)
 
 	maxHeightReached := math.MinInt
 
-	for i := 1; i <= maxX; i++ {
-		for j := 1; j <= maxX; j++ {
+	for i := 1; i <= minX; i++ {
+		for j := 1; j <= minX; j++ {
 			height, ok := probe.testTrajectory(i, j)
 			if ok && height > maxHeightReached {
 				maxHeightReached = height
