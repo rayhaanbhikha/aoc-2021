@@ -72,38 +72,66 @@ class Node {
     }
 
     explode() {
-        this.parent.addToLeftChild(this.left.val);
-        this.parent.addToRightChild(this.right.val);
+        this.findLeftMostInsertionNode(this.left.val);
+        this.findRightMostInsertionNode(this.right.val);
         this.leafNode = true;
         this.val = 0;
         this.left = null;
         this.right = null;
     }
 
-    addToRightChild(val) {
-        if (this.right.leafNode && this.right.val != val) {
-            this.right.updateVal(val)
+    findLeftMostInsertionNode(val) {
+        if (this.parent == null) return;
+
+        if (this.parent.left == this) {
+            this.parent.findLeftMostInsertionNode(val);
             return;
         }
 
-        if (this.parent == null) {
-            this.right.addToLeftChild(val)
-            return;
-        }
-
-        this.parent.addToRightChild(val)
+        this.parent.left.insertRightMostLeafNode(val);
+        return
     }
 
-    addToLeftChild(val) {
-        if (this.left.leafNode && this.left.val != val) {
-            this.left.updateVal(val)
+    insertRightMostLeafNode(val) {
+        if (this.leafNode) {
+            this.updateVal(val);
             return;
         }
 
-        this.parent?.addToLeftChild(val)
+        if(this.right.leafNode) {
+            this.right.updateVal(val);
+            return;
+        }
+        this.right.insertRightMostLeafNode(val);
     }
 
-    updateVal(val) {
+    findRightMostInsertionNode(val) {
+        if (this.parent == null) return;
+
+        if (this.parent.right == this) {
+            this.parent.findRightMostInsertionNode(val);
+            return;
+        }
+
+        // it's flipped.
+        this.parent.right.insertLeftMostLeafNode(val);
+        return;
+    }
+
+    insertLeftMostLeafNode(val) {
+        if (this.leafNode) {
+            this.updateVal(val);
+            return;
+        }
+
+        if(this.left.leafNode) {
+            this.left.updateVal(val);
+            return;
+        }
+        this.left.insertLeftMostLeafNode(val);
+    }
+
+    updateVal(val) { 
         this.val += val;
         if (this.val >= 10) this.split();
     }
@@ -136,13 +164,17 @@ class Node {
     }
 }
 
-const n1 = Node.fromString(data[0].trim())
+const n1 = Node.fromString("[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]")
 const n2 = Node.fromString(data[1])
-console.log(n1.rawString)
+// console.log(n1.rawString)
 n1.print()
+// console.log(n1 === n1);
+// console.log(n1 === n2);
 // console.log("----")
 // const res = Node.addNodes(n1, n2);
 // console.log(res);
+// const res = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
+// const res = Node.fromString("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]")
 // res.reduce()
 // res.print();
 // const result= data
