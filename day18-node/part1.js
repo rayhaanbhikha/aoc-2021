@@ -150,28 +150,30 @@ class Node {
 
     printf(res) {
         if (this.leafNode) {
-            res.push(this.val);
-            // process.stdout.write(`${this.val}`);
+            res.push({ level: this.level, val: this.val, leafNode: true });
             return
         }
+        res.push({ level: this.level, branch: 'L', val: 'x', leafNode: false })
         this.left?.printf(res);
-        // process.stdout.write(",");
+        res.push({ level: this.level, branch: 'R', val: 'x', leafNode: false })
         this.right?.printf(res);
+    }
+
+    treeVals() {
+        const res = [];
+        this.printf(res);
+        return res.filter(v => v.leafNode).map(v => v.val).join(",");
     }
 
     print() {
         const res = [];
         this.printf(res);
-        return res.join(",");
+        console.log(res.sort((a, b) => a.level - b.level));
+        return ;
     }
 
-    reduce() {
-        if (this.leafNode && this.val >= 10) {
-            this.split();
-            return true
-        }
-
-        if(this.left?.reduce()) {
+    explodePairs() {
+        if(this.left?.explodePairs()) {
             return true;
         }
 
@@ -180,43 +182,75 @@ class Node {
             this.explode();
             return true;
         }
-
-        if (this.right?.reduce()) {
-            return true;
+     
+        if (this.right?.explodePairs()) {
+            return true
         }
 
         return false;
     }
 
+    splitNum() {
+        if(this.left?.splitNum()) {
+            return true;
+        }
+
+        if (this.leafNode && this.val >= 10) {
+            this.split();
+            return true
+        }
+     
+        if (this.right?.splitNum()) {
+            return true
+        }
+
+        return false;
+    }
+
+    explodePairsRepeat() {
+        const res = this.explodePairs();
+        if (res) {
+            return this.explodePairsRepeat();
+        }
+    }
+
+    splitRepeat() {
+        const res = this.splitNum();
+        if (res) {
+            return this.splitRepeat();
+        }
+    }
+
     reduceNodes() {
-        let isReducing = true;
-        do {
-            isReducing = this.reduce();
-        } while (isReducing)
+        const res = this.explodePairsRepeat() || this.splitNum();
+        if (res) {
+            return this.reduceNodes();
+        }
+        // while (this.explodePairsRepeat() || this.splitRepeat()) {}
     }
 }
 
-// ----------------- Start Test Reducer -------------
-const pairs = [
-    ["[[[[[9,8],1],2],3],4]", "0,9,2,3,4"],
-    ["[7,[6,[5,[4,[3,2]]]]]", "7,6,5,7,0"],
-    ["[[6,[5,[4,[3,2]]]],1]", "6,5,7,0,3"],
-    ["[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]", "3,2,8,0,9,5,7,0"]
-]
+// // ----------------- Start Test Reducer -------------
+// const pairs = [
+//     ["[[[[[9,8],1],2],3],4]", "0,9,2,3,4"],
+//     ["[7,[6,[5,[4,[3,2]]]]]", "7,6,5,7,0"],
+//     ["[[6,[5,[4,[3,2]]]],1]", "6,5,7,0,3"],
+//     ["[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]", "3,2,8,0,9,5,7,0"]
+// ]
 
-pairs.forEach((val) => {
-    const [pairsString, expectedResult] = val;
-    const n = Node.fromString(pairsString);
-    n.reduceNodes();
-    assert(n.print() === expectedResult, `reducer failed. String: ${pairsString}, Expected Result${expectedResult} `);
-})
-// ----------------- End Test Reducer -------------
+// pairs.forEach((val) => {
+//     const [pairsString, expectedResult] = val;
+//     const n = Node.fromString(pairsString);
+//     n.reduceNodes();
+//     assert(n.treeVals() === expectedResult, `reducer failed. String: ${pairsString}, Expected Result${expectedResult} `);
+// })
+// // ----------------- End Test Reducer -------------
 
-const n1 = Node.fromString("[[[[4,3],4],4],[7,[[8,4],9]]]")
-const n2 = Node.fromString("[1,1]")
-const sum = Node.addNodes(n1, n2);
-sum.reduceNodes();
-assert(sum.print() === "0,7,4,7,8,6,0,8,1");
+// const n1 = Node.fromString("[[[[4,3],4],4],[7,[[8,4],9]]]")
+// const n2 = Node.fromString("[1,1]")
+// const sum = Node.addNodes(n1, n2);
+// sum.reduceNodes();
+// assert(sum.treeVals() === "0,7,4,7,8,6,0,8,1");
 
 
 // const node1 = Node.fromString("[[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]]");
@@ -224,12 +258,13 @@ assert(sum.print() === "0,7,4,7,8,6,0,8,1");
 const node1 = Node.fromString(data[0])
 const node2 = Node.fromString(data[1])
 
-console.log(node1.print());
-console.log(node2.print());
+// node1.print();
+// console.log(node1.treeVals());
+// console.log(node2.treeVals());
 
 const res = Node.addNodes(node1, node2);
 res.reduceNodes();
-console.log(res.print());
+console.log(res.treeVals());
 
 
 
@@ -248,19 +283,19 @@ console.log(res.print());
 
 // const n2 = Node.fromString("[[6,[5,[4,[3,2]]]],1]")
 // n2.reduceNodes();
-// n2.print();
+// n2.treeVals();
 
 // const t = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
 // t.reduceNodes();
-// t.print();
+// t.treeVals();
 
 // n1.reduceNodes()
-// n1.print()
+// n1.treeVals()
 // console.log("\n\n----\n\n")
-// n2.print()
+// n2.treeVals()
 // const res = Node.addNodes(n1, n2);
 // res.reduceNodes()
-// res.print()
+// res.treeVals()
 // const result= data
 //     .map(pairString => Node.fromString(pairString))
 //     .reduce((acc, node) => {
