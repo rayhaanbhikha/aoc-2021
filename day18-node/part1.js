@@ -1,8 +1,7 @@
 const { readFileSync } = require("fs");
 const assert = require('assert');
 
-const data = readFileSync('./sample', { encoding: 'utf-8' }).trim().split('\n');
-// const data = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
+const data = readFileSync('./input', { encoding: 'utf-8' }).trim().split('\n');
 
 function parsePair(data) {
     const insideData = data.slice(1, data.length - 1)
@@ -226,9 +225,24 @@ class Node {
         if (res) {
             return this.reduceNodes();
         }
-        // while (this.explodePairsRepeat() || this.splitRepeat()) {}
+    }
+
+    magnitude() {
+        if (this.leafNode) { // single value.
+            return this.val;
+        }
+
+        // node just before pair.
+        if (this.left?.leafNode && this.right?.leafNode) {
+            return (3 * this.left.val) + (2 * this.right.val);
+        }
+
+        return 3 * this.left.magnitude() + 2 * this.right.magnitude();
     }
 }
+
+// console.log(Node.fromString("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]").magnitude())
+// console.log(Node.fromString("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]").magnitude())
 
 // // ----------------- Start Test Reducer -------------
 // const pairs = [
@@ -255,53 +269,24 @@ class Node {
 
 // const node1 = Node.fromString("[[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]]");
 // const node2 = Node.fromString("[2,9]");
-const node1 = Node.fromString(data[0])
-const node2 = Node.fromString(data[1])
+// const node1 = Node.fromString(data[0])
+// const node2 = Node.fromString(data[1])
 
-// node1.print();
-// console.log(node1.treeVals());
-// console.log(node2.treeVals());
+// // node1.print();
+// // console.log(node1.treeVals());
+// // console.log(node2.treeVals());
 
-const res = Node.addNodes(node1, node2);
-res.reduceNodes();
-console.log(res.treeVals());
-
-
+// const res = Node.addNodes(node1, node2);
+// res.reduceNodes();
+// console.log(res.treeVals());
 
 
+const res = data
+    .map(n => Node.fromString(n))
+    .reduce((acc, node) => {
+        const res = Node.addNodes(acc, node);
+        res.reduceNodes();
+        return res;
+    });
 
-
-
-
-// const pairs = ['[1,1]', '[2,2]', '[3,3]', '[4,4]', '[5,5]', '[6,6]'];
-
-// const res = pairs
-//     .map(n => Node.fromString(n))
-//     .reduce((acc, node) => {
-//         return Node.addNodes(acc, node);
-//     });
-
-// const n2 = Node.fromString("[[6,[5,[4,[3,2]]]],1]")
-// n2.reduceNodes();
-// n2.treeVals();
-
-// const t = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
-// t.reduceNodes();
-// t.treeVals();
-
-// n1.reduceNodes()
-// n1.treeVals()
-// console.log("\n\n----\n\n")
-// n2.treeVals()
-// const res = Node.addNodes(n1, n2);
-// res.reduceNodes()
-// res.treeVals()
-// const result= data
-//     .map(pairString => Node.fromString(pairString))
-//     .reduce((acc, node) => {
-//         console.log(acc, node);
-//         const res = Node.addNodes(acc, node)
-//         res.reduce();
-//         return res;
-//     });
-
+console.log(res.magnitude())
