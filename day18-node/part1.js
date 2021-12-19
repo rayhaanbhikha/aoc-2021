@@ -25,8 +25,9 @@ function parsePair(data) {
 }
 
 class Node {
-    constructor(parent, pairsString) {
+    constructor(parent, pairsString, level) {
         this.parent = parent;
+        this.level = level;
         const num = Number(pairsString);
 
         if (pairsString == "root") {
@@ -44,26 +45,34 @@ class Node {
     }
 
     static fromString(pairsString) {
-        return new Node(null, pairsString)
+        return new Node(null, pairsString, 0)
     }
 
     static addNodes(node1, node2) {
-        const parentNode = new Node(null, "root");
+        const parentNode = new Node(null, "root", 0);
         parentNode.left = node1;
         node1.parent = parentNode;
+        node1.incrementLevel();
         parentNode.right = node2;
         node2.parent = parentNode;
+        node2.incrementLevel();
         return parentNode;
+    }
+
+    incrementLevel() {
+        this.level++
+        this.left?.incrementLevel();
+        this.right?.incrementLevel();
     }
 
     parse(data) {
         const { left, right } = parsePair(data)
         if (left) {
-            this.left = new Node(this, left);
+            this.left = new Node(this, left, this.level + 1);
         }
 
         if (right) {
-            this.right = new Node(this, right)
+            this.right = new Node(this, right, this.level + 1);
         }
     }
 
@@ -71,8 +80,8 @@ class Node {
         const answer = this.val / 2
         this.leafNode = false;
         this.val = 0;
-        this.left = new Node(this, Math.floor(answer));
-        this.right = new Node(this, Math.ceil(answer));
+        this.left = new Node(this, Math.floor(answer), this.level+1);
+        this.right = new Node(this, Math.ceil(answer), this.level+1);
     }
 
     explode() {
@@ -137,7 +146,6 @@ class Node {
 
     updateVal(val) { 
         this.val += val;
-        if (this.val >= 10) this.split();
     }
 
     printf(res) {
@@ -157,23 +165,23 @@ class Node {
         return res.join(",");
     }
 
-    reduce(level=0) {
+    reduce() {
         if (this.leafNode && this.val >= 10) {
             this.split();
             return true
         }
 
-        if(this.left?.reduce(level+1)) {
+        if(this.left?.reduce()) {
             return true;
         }
 
-        if (level >= 4 && this.left?.leafNode && this.right?.leafNode) {
+        if (this.level >= 4 && this.left?.leafNode && this.right?.leafNode) {
             // just above leaf nodes.
             this.explode();
             return true;
         }
 
-        if (this.right?.reduce(level+1)) {
+        if (this.right?.reduce()) {
             return true;
         }
 
@@ -204,6 +212,31 @@ pairs.forEach((val) => {
 })
 // ----------------- End Test Reducer -------------
 
+const n1 = Node.fromString("[[[[4,3],4],4],[7,[[8,4],9]]]")
+const n2 = Node.fromString("[1,1]")
+const sum = Node.addNodes(n1, n2);
+sum.reduceNodes();
+assert(sum.print() === "0,7,4,7,8,6,0,8,1");
+
+
+// const node1 = Node.fromString("[[[[6,6],[6,6]],[[6,0],[6,7]]],[[[7,7],[8,9]],[8,[8,1]]]]");
+// const node2 = Node.fromString("[2,9]");
+const node1 = Node.fromString(data[0])
+const node2 = Node.fromString(data[1])
+
+console.log(node1.print());
+console.log(node2.print());
+
+const res = Node.addNodes(node1, node2);
+res.reduceNodes();
+console.log(res.print());
+
+
+
+
+
+
+
 
 // const pairs = ['[1,1]', '[2,2]', '[3,3]', '[4,4]', '[5,5]', '[6,6]'];
 
@@ -213,11 +246,6 @@ pairs.forEach((val) => {
 //         return Node.addNodes(acc, node);
 //     });
 
-// res.reduceNodes()
-// res.print()
-// console.log(res.left)
-// console.log(res.right)
-
 // const n2 = Node.fromString("[[6,[5,[4,[3,2]]]],1]")
 // n2.reduceNodes();
 // n2.print();
@@ -226,8 +254,6 @@ pairs.forEach((val) => {
 // t.reduceNodes();
 // t.print();
 
-// const n1 = Node.fromString(data[0])
-// const n2 = Node.fromString(data[1])
 // n1.reduceNodes()
 // n1.print()
 // console.log("\n\n----\n\n")
