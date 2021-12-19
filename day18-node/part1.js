@@ -1,4 +1,5 @@
 const { readFileSync } = require("fs");
+const assert = require('assert');
 
 const data = readFileSync('./sample', { encoding: 'utf-8' }).trim().split('\n');
 // const data = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
@@ -26,25 +27,28 @@ function parsePair(data) {
 class Node {
     constructor(parent, pairsString) {
         this.parent = parent;
-
         const num = Number(pairsString);
-        if (num) {
-            this.val = num;
-            this.leafNode = true;
-        } else {
+
+        if (pairsString == "root") {
+            this.val = 0;
+            this.leafNode = false;
+        } else if (num !== 0 && (isNaN(num) || num == "")) {
             this.rawString = pairsString;
             this.parse(pairsString);
             this.leafNode = false;
             this.val = 0;
+        } else {
+            this.val = num;
+            this.leafNode = true;
         }
     }
 
     static fromString(pairsString) {
-        return new Node(null, pairsString, 0)
+        return new Node(null, pairsString)
     }
 
     static addNodes(node1, node2) {
-        const parentNode = new Node(null, "");
+        const parentNode = new Node(null, "root");
         parentNode.left = node1;
         node1.parent = parentNode;
         parentNode.right = node2;
@@ -98,11 +102,11 @@ class Node {
             return;
         }
 
-        if(this.right.leafNode) {
+        if(this.right?.leafNode) {
             this.right.updateVal(val);
             return;
         }
-        this.right.insertRightMostLeafNode(val);
+        this.right?.insertRightMostLeafNode(val);
     }
 
     findRightMostInsertionNode(val) {
@@ -124,11 +128,11 @@ class Node {
             return;
         }
 
-        if(this.left.leafNode) {
+        if(this.left?.leafNode) {
             this.left.updateVal(val);
             return;
         }
-        this.left.insertLeftMostLeafNode(val);
+        this.left?.insertLeftMostLeafNode(val);
     }
 
     updateVal(val) { 
@@ -136,47 +140,101 @@ class Node {
         if (this.val >= 10) this.split();
     }
 
-    print() {
+    printf(res) {
         if (this.leafNode) {
-            process.stdout.write(`${this.val} `);
+            res.push(this.val);
+            // process.stdout.write(`${this.val}`);
             return
         }
-        this.left?.print();
-        process.stdout.write(",");
-        this.right?.print();
+        this.left?.printf(res);
+        // process.stdout.write(",");
+        this.right?.printf(res);
+    }
+
+    print() {
+        const res = [];
+        this.printf(res);
+        return res.join(",");
     }
 
     reduce(level=0) {
         if (this.leafNode && this.val >= 10) {
             this.split();
-            return
+            return true
         }
 
-        this.left?.reduce(level+1)
+        if(this.left?.reduce(level+1)) {
+            return true;
+        }
 
         if (level >= 4 && this.left?.leafNode && this.right?.leafNode) {
             // just above leaf nodes.
             this.explode();
-            return;
+            return true;
         }
 
-        this.right?.reduce(level+1)
+        if (this.right?.reduce(level+1)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    reduceNodes() {
+        let isReducing = true;
+        do {
+            isReducing = this.reduce();
+        } while (isReducing)
     }
 }
 
-const n1 = Node.fromString("[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]")
-const n2 = Node.fromString(data[1])
-// console.log(n1.rawString)
-n1.print()
-// console.log(n1 === n1);
-// console.log(n1 === n2);
-// console.log("----")
+// ----------------- Start Test Reducer -------------
+const pairs = [
+    ["[[[[[9,8],1],2],3],4]", "0,9,2,3,4"],
+    ["[7,[6,[5,[4,[3,2]]]]]", "7,6,5,7,0"],
+    ["[[6,[5,[4,[3,2]]]],1]", "6,5,7,0,3"],
+    ["[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]", "3,2,8,0,9,5,7,0"]
+]
+
+pairs.forEach((val) => {
+    const [pairsString, expectedResult] = val;
+    const n = Node.fromString(pairsString);
+    n.reduceNodes();
+    assert(n.print() === expectedResult, `reducer failed. String: ${pairsString}, Expected Result${expectedResult} `);
+})
+// ----------------- End Test Reducer -------------
+
+
+// const pairs = ['[1,1]', '[2,2]', '[3,3]', '[4,4]', '[5,5]', '[6,6]'];
+
+// const res = pairs
+//     .map(n => Node.fromString(n))
+//     .reduce((acc, node) => {
+//         return Node.addNodes(acc, node);
+//     });
+
+// res.reduceNodes()
+// res.print()
+// console.log(res.left)
+// console.log(res.right)
+
+// const n2 = Node.fromString("[[6,[5,[4,[3,2]]]],1]")
+// n2.reduceNodes();
+// n2.print();
+
+// const t = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
+// t.reduceNodes();
+// t.print();
+
+// const n1 = Node.fromString(data[0])
+// const n2 = Node.fromString(data[1])
+// n1.reduceNodes()
+// n1.print()
+// console.log("\n\n----\n\n")
+// n2.print()
 // const res = Node.addNodes(n1, n2);
-// console.log(res);
-// const res = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
-// const res = Node.fromString("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]")
-// res.reduce()
-// res.print();
+// res.reduceNodes()
+// res.print()
 // const result= data
 //     .map(pairString => Node.fromString(pairString))
 //     .reduce((acc, node) => {
@@ -186,33 +244,3 @@ n1.print()
 //         return res;
 //     });
 
-// result.print()
-
-
-// const node = new Node(null, "[3,[1,5]]");
-
-// console.log(node);
-// node.right.explode();
-// console.log(node);
-// const n = Node.fromString("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")
-// const n = Node.fromString("[[6,[5,[4,[3,2]]]],1]")
-// n.reduce();
-
-// console.log(n);
-// n.print()
-// console.log(JSON.stringify(n, null, 2))
-
-
-
-
-// const node1 = new Node(null, data);
-// const node2 = new Node(null, "[1,1]");
-// // node1.print()
-// // const node3 = Node.addNodes(node1, node2)
-
-// // console.log(node3);
-// const node = new Node(null, "[[15,3],4]")
-// node.print()
-// // console.log(node)
-// // console.log(node.left.split());
-// // console.log(node)
